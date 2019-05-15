@@ -1,0 +1,17 @@
+-classpath选项：
+        specifies a list of directories , JAR archives and ZIP archives to
+        search for class files . class path entries are separated by colons(:).
+        // 说明classpath可以由哪些文件组成
+
+
+        specifying -cp or -classpath overrides any setting of the CLASSPATH environment variable.
+        // 使用-cp会重载CLASSPATH环境变量
+
+
+        if -classpath or -cp are not used and CLASSPATH is not set , the user class path consists of the
+        current directory(.)
+        //这个说明了classpath的一个顺序，先是 -classpath 。如果没有使用-cp/-classpath，那么使用环境变量中的CLASSPATH。
+        //如果仍没有定义，则把当前目录作为classpath.
+
+
+

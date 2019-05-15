@@ -1,0 +1,39 @@
+java命令语法：java [options] class [argument]
+            java [options] -jar file.jar [argument]
+
+options: command-line options
+class: name of the class to be invoked
+file.jar: name of the jar file to be invoked used only with the -jar option
+argument: argument passed to the main function
+
+Description:
+    the java tool launches a java application. it does this by starting a Java runtime environment, loading
+    specified class,and invoking that class's main method. the method must be declared public and static,
+
+    it must not return any value,and it must accept a String array as parameter. the method declaration must
+    look like the following:
+            public static void main(String[] args)
+
+    by default,the first non-option argument is the name of the class to be invoked . A fully-qualified class
+    name should be used . //需要使用类的全限定名称 ,例如：com/hyena/main/HelloWorld
+    // jvm会按照给定的类的全限定名称在给定的classpath下查找主类
+
+    if the -jar option is specified,the first non-option argument is the name of a JAR archive containing class
+    and resource files for the application with the startup class indicated by the Main-class manifest header.
+
+    // 上面说的是载入主类的时候
+
+
+    the java runtime searches for the startup class , and other classes used , in three sets of locations :
+    // java查找类的时候，会在一下三种位置查找
+
+        1)the bootstrap classpath , 2)the installed extensions, 2)the user classpath.
+
+    分别对应的环境变量为：
+        1)sun.boot.class.path, 2)java.ext.dirs, 3)java.class.path
+
+    the option argument after the class name or JAR file name are passed to the
+    main function.
+
+
+

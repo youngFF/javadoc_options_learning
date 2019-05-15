@@ -1,0 +1,21 @@
+-agentlib:libname[=options]
+    load native agent library libname.  // 本地代理库
+
+    这个是依赖平台的，对于windows来说，它会从PATH路径下，找名称为libname.dll的文件。
+    而在linux下，会在LD_LIBRARY_PATH路径下找libname.so
+
+
+-agentpath:pathname[options]
+
+    pathname会是绝对路径名称.例如：-agentpath:c:/mylibs/foo.dll=opt1,opt2
+
+例子：
+    -agentlib:hprof=cpu=samples,interval=20,depth=3
+    功能：Get sample cpu information every 20 millisec, with a stack depth of 3
+
+
+
+// 这个是调用使用本地库代码。
+
+// 在仔细看看，感觉不会，因为有好多c++代码。
+

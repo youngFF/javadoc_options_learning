@@ -1,0 +1,93 @@
+java.lang.ClassFileTransformer
+    An agent provides an implementation of this interface in order to transform class files.
+    the transformation occurs before the class is defined by the JVM.
+
+    // 这个接口的实现是一个代理，用来改变class文件.  这个改变发生在 这个类由JVM定义之前
+
+
+java.lang.ClassFileTransformer方法： byte[] transform(ClassLoader loader,
+                                                     String className,
+                                                     Class<?> classBeingRedefined,
+                                                     ProtectionDomain protectionDomain,
+                                                     byte[] classFileBuffer) throws IllegalClassFormatException.
+
+           the implementation of this method may transform the supplied class file and return a new replacement class
+           file
+           // 这个方法的实现可能会改变 supplied class文件，然后返回一个新的替换的class文件.
+
+
+           there are two kinds of transformers .
+                retransformation capable.
+                retransformation incapable
+
+                            ----- 通过Instrumentation.addTransformer(ClassFileTransformer , boolean)注册
+
+            once a transformer has been registered with addTransformer, the transformer will be called for
+            every new class definition and every class redefinition.
+            // 一旦通过addTransformer方法注册transformer。 每个新类定义和类重新定义的时候，都会调用transformer
+
+
+            retransformation capable transformers will also be called on every class retransformation.
+            // 每个class retransformation的时候，retransformation capable transformer都会被调用
+
+
+
+            // 这里要明白几个概念 , define class , redefine class , transformation ,retransformation
+
+
+                 ------------------- inject content -----------------
+
+
+
+            the request for a new class definition is made with ClassLoader.defineClass or its native
+            equivalents.the request for a class redefinition is made with Instrumentation.redefineClasses
+            or its equivalents.
+            // 这个说明了define class 和 redefine class要调用的方法
+
+            the request for a class retransformation is made with Instrumentation.retransformClasses or its
+            native equivalents.
+            // 这个说明了retransform 是要调用的方法
+
+            the transformer is called during the processing of the request , before the class file bytes have
+            been verified and applied.
+            // 说明了transformer调用的时机。每次处理上面的请求的时候，transformer都会被调用。
+
+
+
+            when there are multiple transformers , transformations are composed by chaining the transform calls.
+            that is , the byte array returned by one call to transform becomes the input(via the classfileBuffer
+            parameter) to the next call.
+            // 这个说明了多个transformer时候的调用顺序---> 即链式法则
+
+
+            transformers调用顺序： retransformer incapable < retransformer incapable native <
+                                 retransformer capable < retransformer capable native
+                                 // 这个native transformer我猜应该是使用c/c++语言写的，直接处理classFile bytes
+
+
+
+           if the implementation method determines that no transformations are needed , it should return null.
+           otherwise, it should create a new byte[] array , copy the input classfileBuffer into it . along with
+           all desired transformations , and return the new array . the input classfileBuffer must not be modified.
+
+           in the retransform and redefine cases, the transformer must support the redefinition semantics:if a class
+           that the transformer changed during initial definition is later retransformed or redefined , the transformer
+           must insure that the second class file is a legal redefinition of the first output class file.
+
+
+           Parameters:
+                        loader - the defining loader of the class to be transformed , may be null if the bootstrap loader
+                        className - the name of the class in the internal form of fully qualified and interface names as
+                        defined in The java virtual machine specification . For example  "java/util/List"
+
+                        classBeingRedefined - if this is triggered by a redefine or retransform , the class being redefined
+                        or retransformed; if this is a class load , null .
+
+                        protectionDomain - the protection domain of the class being defined or redefined.
+
+                        classfileBuffer - the input byte buffer in class file format - must not be modified.
+
+           Returns :
+                        a well formed class file buffer(the result of the transform) , or null if no transform is
+                        performed.
+

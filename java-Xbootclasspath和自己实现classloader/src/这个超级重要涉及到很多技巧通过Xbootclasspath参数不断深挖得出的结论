@@ -1,0 +1,303 @@
+记一次通过Xbootclasspath参数不断深挖获得的知识点，以及这个学习的过程。
+
+启发：主要是通过某个知识点作为引线，不断的引出新的知识点。不断让你去深挖，找出相关联的知识点，
+     我觉得这样是一个好的学习过程。也是一个好的学习方法。也是一本好书应该做的 。
+
+     --- 对于我个人而言，我好像从这种学习方法中获益更多！！ : 可能是那种不断拨开迷雾，不断探索
+     不断解谜的感觉吸引我。看着前面的谜团，就想解开，就想知道为什么，就想知道事物之间的联系。
+
+
+
+-----------------------------   开始#1  ------------------------------------
+
+问题引出：我首先是想知道参数Xbootclasspath是怎么使用的。
+错误想法：我想的是，Xbootclasspath路径上的类，在jvm启动是会随着rt.jar类面的类启动。即
+        jvm启动时加载到内存。这样在java源文件中就不用显式的用import引入要使用的类了。
+
+做法：我在XbootclasspathTest.java 使用了com.jayway.jsonpath.spi.json.TapestryJsonProvider
+     然后编译这个源文件。
+
+结果：结果显而易见，编译没有通过。因为没有程序都不知道TapestryJsonProvider这个类在哪。
+
+接着：添加依赖，编译，运行，没有问题。
+
+错误原因：虽然把TapestryJsonProvider放在Xbootclasspath上，但是这个路径的类是在运行时
+        的类加载路径，而不是编译时。编译时还是找不这个类的具体位置。因为虽然你写了com.jayway.jsonpath.spi.json.TapestryJsonProvider
+        但是编译时编译系统根本不知道这是个什么东西，比如：它是个接口，类，还是什么啊，里面
+        有什么方法啊，这个编译系统一概不知。
+
+----------------------------  #2 -------------------------------------------
+
+困惑：虽然能够成功运行，但是还是没解决我的疑惑，即Xbootclasspath应该怎么用。
+原因：intellij帮我们做了太多的事情。编译，运行。
+     其实intellij也是使用相应的命令来完成这些事情。
+
+个人想法：直接使用命令操作，编译，运行过程；不实用intellij
+
+----------------------------- #3 ------------------------------------------
+
+前提：因为已经在#1中已经将com.jayway.jsonpath.spi.json.TapestryJsonProvider编译好了，
+     所以我想看看编译好的文件是啥样。----- 所以我找到了java -verbose XXX.class
+
+结果：这个命令能够查看class文件中的内容。
+
+接着：我想尝试一下自己使用命令行编译 ---- javac
+
+运行命令： javac -verbose  /path.../Xbootclasspath.java
+
+结果打印如下：
+    [语法分析开始时间 SimpleFileObject[/Users/hyena/Desktop/javadoc参数学习/java-Xbootclasspath/src/com/javadoc/xbootclasspath/XbootclasspathTest.java]]
+    [语法分析已完成, 用时 32 毫秒]
+    [正在加载/modules/jdk.zipfs/module-info.class]
+    [正在加载/modules/jdk.scripting.nashorn/module-info.class]
+    [正在加载/modules/jdk.management/module-info.class]
+    ..... 还有很多 具体的在 resultfile文件中....
+
+    [源文件的搜索路径: .]
+    [类文件的搜索路径: /Users/hyena/local/jdk_1.9/Home/lib/modules,.]
+    XbootclasspathTest.java:3: 错误: 程序包com.jayway.jsonpath不存在
+    import com.jayway.jsonpath.Filter;
+
+    XbootclasspathTest.java:11: 错误: 找不到符号
+            System.out.println("filter classloader: " + Filter.class.getClassLoader());
+                                                        ^
+      符号:   类 Filter
+      位置: 类 XbootclasspathTest
+    [正在加载/modules/java.base/java/lang/Class.class]
+    [正在加载/modules/java.base/java/lang/reflect/GenericDeclaration.class]
+    [正在加载/modules/java.base/java/lang/reflect/AnnotatedElement.class]
+    [正在加载/modules/java.base/java/lang/reflect/Type.class]
+    [正在加载/modules/java.base/java/lang/ClassLoader.class]
+    [共 404 毫秒]
+    3 个错误
+
+看到这个结果，我有以下的疑问：
+
+        1。这些/modules/XXX/module-info.class 是什么
+        2。为什么会出现错误。
+
+解决问题2：
+     首先，我觉得第二个问题比较好解决 。从上面分析可知，出现这个错误是因为编译系统找不到这个类
+     位置。所以我想能不能把类所在位置(所在jar包)放到javac 上面，上网搜了以下，即-classpath
+
+     接着使用命令 ： javac -classpath /path../json-path.jar  Xbootclasspath.java
+
+     结果： 在resultfile1文件中，可以看到成功编译。
+
+
+解决问题1：
+
+     首先我不知道这个文件在哪.  然后我使用学的shell命令find查找了以下:
+        sudo find / -regex ".*/modules/.*/module-info.class"
+     结果： 没找到。
+
+     接着我换了一下命令，将搜索条件放宽：
+            sudo find /  -regex ".*/modules/.*"  --即只要有modules就行
+
+     不知道怎么的我找到了这个目录：
+        $JAVA_HOME/lib
+        然后我下意识的看看里面的文件,使用命令ls -l ，结果发现又一个classlist文件能打开。
+        结果我就打开了，里面内容如下。
+
+        java/lang/Object
+        java/lang/String
+        java/io/Serializable
+        java/lang/Comparable
+        java/lang/CharSequence
+        java/lang/Class
+        java/lang/reflect/GenericDeclaration
+        java/lang/reflect/AnnotatedElement
+        java/lang/reflect/Type
+        java/lang/Cloneable
+        java/lang/ClassLoader
+        java/lang/System
+        java/lang/Throwable
+        java/lang/Error
+        java/lang/ThreadDeath
+        java/lang/Exception
+        java/lang/RuntimeException
+        java/lang/SecurityManager
+        java/security/ProtectionDomain
+        java/security/AccessControlContext
+        java/security/SecureClassLoader
+        java/lang/ClassNotFoundException
+        java/lang/ReflectiveOperationException
+        java/lang/NoClassDefFoundError
+        java/lang/LinkageError
+        java/lang/ClassCastException
+        java/lang/ArrayStoreException
+        java/lang/VirtualMachineError
+        java/lang/OutOfMemoryError
+        java/lang/StackOverflowError
+        java/lang/IllegalMonitorStateException
+        java/lang/ref/Reference
+        java/lang/ref/SoftReference
+        java/lang/ref/WeakReference
+        java/lang/ref/FinalReference
+        java/lang/ref/PhantomReference
+        java/lang/ref/Finalizer
+        java/lang/Thread
+        java/lang/Runnable
+        java/lang/ThreadGroup
+        java/lang/Thread$UncaughtExceptionHandler
+        java/util/Properties
+        java/util/Hashtable
+        java/util/Map
+        java/util/Dictionary
+        java/lang/Module
+        java/lang/reflect/AccessibleObject
+        .... 还有很多类
+
+     发现啥没....这个其实就是 java -verbose:class 打印出来的结果。
+
+     也就是说，这个classlist定义了jvm启动时加载的jvm环境类。
+
+     --- 而module-info.class 我查了一下，时java9带的一个特性。即模块化编程---但是
+     这个我不想管了
+
+
+到此：编译的问题解决了，接着使用命令行运行XbootclasspathTest
+
+----------------------- #4 -------------------
+
+想法：原来我想-Xbootclasspath中的类是jvm启动时加载到内存/jvm中。那么这样就可以找到这个类了
+
+接着： 命令 java -Xbootclasspath:/path.../json-path.jar   com.javadoc.xbootclasspath.XbootclasspathTest
+
+结果：-Xbootclasspath is no longer a supported option.
+   Error: Could not create the Java Virtual Machine.
+   Error: A fatal exception has occurred. Program will exit.
+
+   --告诉我 -Xbootclasspth选项不支持了.
+
+继续： java -Xbootclasspath/a:/path.../json-path.jar   com.javadoc.xbootclasspath.XbootclasspathTest
+      使用-Xbootclasspath/a 选项。
+
+结果： 见XbootclasspthTest 代码。
+
+      TapestryJsonProvider,Filter的classloader都是null，也就是bootstrap loader。
+
+疑问： 使用intellij得到的结果：
+
+      TapestryJsonProvider,Filter的classloader都是sun.misc.Launcher$AppClassLoader@18b4aac
+
+      这是为什么呢？进一步我想想看看jvm里面有哪些classloader，并且这些classlaoder都加载了哪些类
+      这时我想到了taobao-arthas分析工具.
+
+问题：要想使用这个分析工具，你的java进程应该是存活的，运行时间不能太短。所以我在代码中加入了
+    // 使用wait，让线程暂停。然后使用taobao arthas工具查看程序状态
+            synchronized (lock) {
+                lock.wait();
+            }
+
+     然后使用分析工具.
+
+---------------- #5 -------------------
+接下来时arthas分析工具的使用
+
+命令： java -jar arthas-boot.jar ，然后选择要分析的java进程
+
+接着： 命令 classloader ,结果如下：
+
+* [1]: 3524
+  [2]: 29386 org.jetbrains.jps.cmdline.Launcher
+  [3]: 29387 com.javadoc.xbootclasspath.XbootclasspathTest  //输入3 ，enter
+3 /enter
+
+会有如下错误：
+[ERROR] Target process 29387 is not the process using port 3658, you will connect to an unexpected process.
+[ERROR] 1. Try to restart arthas-boot, select process 3524, shutdown it first.
+[ERROR] 2. Or try to use different telnet port, for example: java -jar arthas-boot.jar --telnet-port 9998 --http-port -1
+hyena:taobao-arthas hyena$ java -jar arthas-boot.jar --telnet-port 9998 --http-port -1
+
+根据提示输入命令：
+java -jar arthas-boot.jar --telnet-port 9998 --http-port -1
+hyena:taobao-arthas hyena$ java -jar arthas-boot.jar --telnet-port 9998 --http-port -1
+
+----- 接来下进入正轨 -----
+
+输入： classloader
+显示：
+     name                                       numberOfInstances  loadedCountTotal
+     BootstrapClassLoader                       1                  1454
+     com.taobao.arthas.agent.ArthasClassloader  1                  1026
+     sun.misc.Launcher$AppClassLoader           1                  12
+     sun.reflect.DelegatingClassLoader          5                  5
+     sun.misc.Launcher$ExtClassLoader           1                  1
+
+     它会显示每个classloader的名称，实例个数，以及加载的类个数
+
+输入： classloader -a  //看一下每个classloader加载的具体类
+
+ hash:414493378, sun.misc.Launcher$AppClassLoader@18b4aac2
+ com.intellij.rt.execution.application.AppMainV2
+ com.intellij.rt.execution.application.AppMainV2$1
+ com.intellij.rt.execution.application.AppMainV2$Agent
+ com.javadoc.xbootclasspath.XbootclasspathTest
+ com.jayway.jsonpath.Filter
+ com.jayway.jsonpath.Predicate
+ com.jayway.jsonpath.spi.json.AbstractJsonProvider
+ com.jayway.jsonpath.spi.json.JsonProvider
+ com.jayway.jsonpath.spi.json.TapestryJsonProvider
+ com.taobao.arthas.agent.AgentBootstrap
+ com.taobao.arthas.agent.AgentBootstrap$1
+ com.taobao.arthas.agent.ArthasClassloader
+
+ 可以看到Filter , TapestryJsonProvider是用 AppClassLoader加载的。
+
+
+结论：-Xbootclasspath后面的类路径中类的并不是随着jvm启动加载，而是作为bootstrap classlopader
+     加载类的搜索路径。
+
+     如果 -Xbootclasspath/a:/path../json-path.jar 那么当jvm需要加载com.jayway.jsonpath.spi.json.TapestryJsonProvider
+     这个类的时候，其实是通过bootstrapclass loader加载的。
+
+     如果使用 -classpath /path../json-path.jar 那么当jvm需要加载com.jayway.jsonpath.spi.json.TapestryJsonProvider
+     这个类的时候，其实是通过AppClassLoader加载的。
+
+     这说明什么问题：
+           每个classloader都有一个 "搜索路径" ，当jvm载入类的时候，通过相应的classloader在
+           自身定义的 "搜索路径"中载入这个类。
+
+           bootstrap classloader ：  sun.boot.class.path
+           ExtClassLoader : java.ext.dirs
+           AppClassLoader : java.class.path 也就是 -cp/-classpath
+
+       ** 启发： 所以自定义一个classloader 也可以规定一组路径，然后在这组路径中搜索类。
+
+
+------------- #6 --------------------
+我们复原一下过程： .java --编译---> .class ----classloader---> jvm中
+
+
+首先看编译过程： 编译系统遇见一个类，它会在它的编译路径中搜索类的定义。
+
+再看类载入过程： jvm遇见一个类，使用classloader载入。
+
+问题/有意思 的地方在哪呢：
+
+    有意思的就在 编译过程  和   载入过程
+
+    编译过程只是提供class文件，而载入过程是将class文件载入jvm；这
+    两个过程并没有捆绑关系。
+
+    在编译的时候，只需要提供相应的类定义。而在运行时，它会根据这个类定义使用相应
+    的classloader 在相应的类路径去查找。---- 这就是有意思的地方
+
+    所以说java是动态语言，因为可以一边运行，一边载入类。
+
+    有的时候会遇见，ClassNotFoundException 。这是因为在编译的时候提供了相应的文件，
+    编译系统能够完成编译。而在运行时，classloader却无法找到这个类的位置。
+
+
+---------------------- 总结 --------------
+1。javac , javap , -Xbootclasspath
+2。classloader及其相应的路径
+3。arthas分析工具
+
+
+
+
+
+
+

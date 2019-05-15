@@ -1,0 +1,39 @@
+-verbose
+-verbose:class
+    display information about each class loaded
+
+
+-verbose:gc
+    Reports on each garbage collection event
+
+-verbose:jni
+    Reports  information  about use of native methods and other Java
+    Native Interface activity
+
+
+    通过-verbose:jni打印如下：
+    [Dynamic-linking native method java.lang.System.registerNatives ... JNI]
+    [Registering JNI native method java.lang.System.currentTimeMillis]
+    [Registering JNI native method java.lang.System.nanoTime]
+    [Registering JNI native method java.lang.System.arraycopy]
+    [Dynamic-linking native method java.lang.Thread.registerNatives ... JNI]
+    [Registering JNI native method java.lang.Thread.start0]
+    [Registering JNI native method java.lang.Thread.stop0]
+    [Registering JNI native method java.lang.Thread.isAlive]
+    [Registering JNI native method java.lang.Thread.suspend0]
+    [Registering JNI native method java.lang.Thread.resume0]
+    [Registering JNI native method java.lang.Thread.setPriority0]
+    [Registering JNI native method java.lang.Thread.yield]
+    [Registering JNI native method java.lang.Thread.sleep]
+    [Registering JNI native method java.lang.Thread.currentThread]
+    [Registering JNI native method java.lang.Thread.countStackFrames]
+    [Registering JNI native method java.lang.Thread.interrupt0]
+    [Registering JNI native method java.lang.Thread.isInterrupted]
+    [Registering JNI native method java.lang.Thread.holdsLock]
+    [Registering JNI native method java.lang.Thread.getThreads]
+    [Registering JNI native method java.lang.Thread.dumpThreads]
+    [Registering JNI native method java.lang.Thread.setNativeName]
+
+
+    可以看到，如果类里面有registerNatives方法，会连接native方法，然后注册类中的
+    native方法。

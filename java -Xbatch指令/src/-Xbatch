@@ -1,0 +1,13 @@
+-Xbatch指令：
+    disables background compilation. by default , the jvm compiles the method
+    as a background task , running the method in interpreter mode until the
+                background compilation is finished . the -Xbatch flag disables background
+                compilation so that compilation of all methods proceeds as a foreground
+                task until completed.
+
+
+                // 关闭后台编译功能。默认的情况下，jvm将方法编译成本地方法是作为一个后台进程进行的。
+                // 在后台编译完成之前，都是解释器来解释方法执行。
+
+                // -Xbatch关闭后台编译功能，使得所有方法的编译都作为一个前台进程进行编译(主要是编译
+                // 成字节码)

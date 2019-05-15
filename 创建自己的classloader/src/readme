@@ -1,0 +1,11 @@
+目标：
+
+    1.写一个ClassLoader：
+            给定groupId，artifactId，version，qualifiedName ，载入类到jvm中。
+            并用arthas工具查看
+
+    2.写一个maven jar包下载工具。
+
+    3.利用这个工具来下载maven网络库中的jar包。
+
+    4.写一个maven pom分析工具：

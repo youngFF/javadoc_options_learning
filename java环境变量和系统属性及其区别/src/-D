@@ -1,0 +1,11 @@
+-Dproperty=value： java系统属性
+
+
+    主要是区别java环境变量和系统属性------对应的java代码
+
+        java环境变量大多是大写  // System.getEnv()
+        java系统属性大多是小写 // System.getProperties()
+
+
+
+

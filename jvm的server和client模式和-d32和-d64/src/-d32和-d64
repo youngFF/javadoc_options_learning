@@ -1,0 +1,18 @@
+-d32和-64：
+
+    Specified whether the program is to be run in a 32-bit or 64-bit
+    environment if available.
+    // 如果允许的化，指明程序是运行在32位还是64位
+
+    Currently, only the Java HotSpot Server VM supports 64-bit oper-
+    ations and the -server option is implicit with the use of -d64 .
+    This is subject to change in a future release.
+    // 如果指明了-server , 那么默认使用的就是-d64.
+
+
+    If  neither -d32 nor -d64 is specified, the default is to run in
+    a 32-bit environment, except for 64-bit only systems.   This  is
+    subject to change in a future release.
+    // 如果-d32和-d64都没指明，默认是-d32，除非是运行在64位系统。
+
+

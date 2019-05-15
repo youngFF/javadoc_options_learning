@@ -1,0 +1,17 @@
+-Xbootclasspath: 修改启动的类路径  // 这个选项java已经不支持了
+// 我还是不知道这个bootclasspath 作用是啥
+
+-Xbootclasspath/a:... : 将路径添加到boot class path 的后面，当java自身的boot class path中
+                        的类加载之后，在加载路径中指定的类.// 但是注意，这个路径上的类并不会随着
+                        jvm启动时加载，而是bootstrap classloader加载类搜索路径。
+
+
+-Xbootclasspath/p:... : 之前  //这个选项java现在不支持了
+
+
+//得出结论不同的 class path 中的类，是由不同的classloader加载的。
+
+
+task： 整理这个路径与其对应的classloader问题，每个路径上的类都是由哪个classloader加载的
+
+

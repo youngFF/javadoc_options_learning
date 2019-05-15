@@ -1,0 +1,11 @@
+non-standard option
+
+
+-Xint:
+    operates in interpreted-only mode. Complication to native code is disabled.
+    and all byte-codes are executed by the interpreter . the performance benefits
+    offered by java hotspot VM's adaptive compiler will not present in this mode.
+
+
+    // 使用解释器模式，所有的字节码由解释器执行，不会把字节码编译成本地机器码
+
